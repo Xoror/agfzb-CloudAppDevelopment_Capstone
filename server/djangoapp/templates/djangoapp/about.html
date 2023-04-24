@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Dealership Review</title>
+        {% load static %}
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body>
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <ul class="nav nav-tabs" id="myTab">
+                    <li class="nave-item">
+                        <a class="nav-link" href="{% url 'djangoapp:index' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'djangoapp:about-us' %}" class="nav-link active">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'djangoapp:contact' %}"  class="nav-link">Contact</a>
+                    </li>
+                </ul>
+    
+                <ul class="nav navbar-nav navbar-right">
+                    {% if user.is_authenticated %}
+                    <li>
+                        <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
+                        <a class="btn btn-link" href="#">Logout</a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <form class="form-inline" action="#" method="post">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Username" name="username" >
+                                <input type="password" class="form-control" placeholder="Username" name="psw" >
+                                <button class="btn btn-primary" type="submit">Login</button>
+                                <a class="btn btn-link" href="#">Sign Up</a>
+                            </div>
+                        </form>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+        <h5>
+            Welcome to Best Cars dealership, home to the best cars in North America. We sell domestic and imported cars at reasonable prices.
+        </h5>
+    </body>
+</html>
