@@ -1,15 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    {% load static %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.js"></script>
+    <head>
+        <meta charset="UTF-8">
+        {% load static %}
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
 
-</head>
+    </head>
     <body>
-    <!--Add review form here -->
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <ul class="nav nav-tabs" id="myTab">
+                    <li class="nave-item">
+                        <a class="nav-link" href="{% url 'djangoapp:index' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'djangoapp:about-us' %}" class="nav-link">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'djangoapp:contact' %}"  class="nav-link">Contact</a>
+                    </li>
+                </ul>
+    
+                <ul class="nav navbar-nav navbar-right">
+                    {% if user.is_authenticated %}
+                    <li>
+                        <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
+                        <a class="btn btn-link" href="{% url 'djangoapp:logout' %}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <form class="form-inline" action="{% url 'djangoapp:login' %}" method="post">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Username" name="username" >
+                                <input type="password" class="form-control" placeholder="Username" name="psw" >
+                                <button class="btn btn-primary" type="submit">Login</button>
+                                <a class="btn btn-link" href="{% url 'djangoapp:register' %}">Sign Up</a>
+                            </div>
+                        </form>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+        <form action="{% url 'djangoapp:add_review' dealership.id %}" method="POST">
+            {% csrf_token %}
+            <div class="container">
+                <h1>Add Review for {{dealership.full_name}}</h1>
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="car">Car</label>
+                    <select class="form-control" type="text" name="car" required>
+                        <option value="">Choose car</option>
+                        <option value={False}> None </option>
+                        {% for car in cars %}
+                            <option value={{car.id}}>{{car.carMake.name}} {{car.name}} ({{car.year}})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="purchase">
+                    <label class="form-check-label" for="flexCheckDefault">
+                        Purchased car?
+                    </label>
+                </div>
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="date">If purchased, select date: </label>
+                    <input class="form-control" type="date" name="date">
+                </div>
+                  
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="review">Review</label>
+                    <textarea class="form-control" type="text" placeholder="Enter your review here... " name="review" required></textarea>
+                </div>
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
+        </form>
     </body>
 </html>
