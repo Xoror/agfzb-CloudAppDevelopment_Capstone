@@ -77,9 +77,11 @@ def get_dealerships(request):
     context = {}
     if request.method == "GET":
         url = "https://eu-de.functions.appdomain.cloud/api/v1/web/334d0dd7-f8d4-4bbf-a8b9-763e83ba4a2d/dealership-package/get-dealership"
-        dealerships = get_dealers_from_cf(url)
-        dealer_names = " ".join([dealer.short_name for dealer in dealerships])
-        context["dealerships"] = dealerships
+        #url = "https://eu-de.functions.cloud.ibm.com/api/v1/namespaces/334d0dd7-f8d4-4bbf-a8b9-763e83ba4a2d/actions/dealership-package/get-dealership?blocking=true" 
+        #apikey = "ZWeOsOsnjedSWilr6FnZIXgeq_O_bmBQ4oupwsP4Sjql"
+        dealerships = get_dealers_from_cf(url)#, apikey=apikey)
+        context["dealerships"] = dealerships[0]
+        context["states"] = dealerships[1]
         return render(request, "djangoapp/index.html", context)
         # return HttpResponse(dealer_names)
 
@@ -87,17 +89,20 @@ def get_dealerships(request):
 def get_dealer_details(request, dealer_id):
     context = {}
     if request.method =="GET":
-        #url = "https://eu-de.functions.appdomain.cloud/api/v1/web/334d0dd7-f8d4-4bbf-a8b9-763e83ba4a2d/dealership-package/get-review"
-        url = "https://eu-de.functions.appdomain.cloud/api/v1/web/334d0dd7-f8d4-4bbf-a8b9-763e83ba4a2d/dealership-package/get_review2"
+        url = "https://eu-de.functions.appdomain.cloud/api/v1/web/334d0dd7-f8d4-4bbf-a8b9-763e83ba4a2d/dealership-package/get_review_py"
         reviews = get_dealer_reviews_from_cf(url, dealer_id = dealer_id)
+        url2 = url = "https://eu-de.functions.appdomain.cloud/api/v1/web/334d0dd7-f8d4-4bbf-a8b9-763e83ba4a2d/dealership-package/get-dealership"
+        dealership = get_dealers_from_cf(url2, id= dealer_id)
+        print(dealership)
         context["reviews"] = reviews
+        context["dealership"] = dealership[0][0]
         return render(request, "djangoapp/dealer_details.html", context)
 
 def add_review(request, dealer_id):
     context = {}
     url = "https://eu-de.functions.appdomain.cloud/api/v1/web/334d0dd7-f8d4-4bbf-a8b9-763e83ba4a2d/dealership-package/get-dealership"
     dealership = get_dealers_from_cf(url, id=dealer_id)
-    context["dealership"] = dealership[0]
+    context["dealership"] = dealership[0][0]
     if request.method == "GET":
         cars = CarModel.objects.all()
         context["cars"] = cars

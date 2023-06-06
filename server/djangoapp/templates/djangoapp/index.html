@@ -6,9 +6,10 @@
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+        <link rel="stylesheet" type="text/css" src="{{ STATIC_URL }}/admin/css/styles.css"/>
     </head>
-    <body style="background-color: darkslategray; color: white;">
+    <body>
         <nav class="navbar navbar-dark bg-dark">
             <div class="container-fluid">
                 <ul class="nav nav-tabs" id="myTab">
@@ -46,29 +47,58 @@
             </div>
         </nav>
 
-    <table class="table table-dark table-striped">
-        <thead>
-            <tr>
-                <th> Name </th>
-                <th> State </th>
-                <th> City </th>
-                <th> Address </th>
-                <th> Zip Code</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for dealership in dealerships %}
+        <table id="dealership-table" class="table table-dark table-striped">
+            <thead>
                 <tr>
-                    <td> {{dealership.full_name}} </td>
-                    <td> {{dealership.state}} </td>
-                    <td> {{dealership.city}} </td>
-                    <td> {{dealership.address}} </td>
-                    <td> {{dealership.zip}} </td>
+                    <th data-field="id">ID</th>
+                    <th data-field="name"> Name </th>
+                    <th data-field="state" > State 
+                        <select  id="state-select" onclick="filter()"">
+                            <option value="">Filter by State...</option>
+                            {% for state in states %}
+                                <option key={{state}} id={{state}} value={{state}}>{{state}}</option>
+                            {% endfor %}
+                        </select>
+                    </th>
+                    <th data-field="city"> City </th>
+                    <th data-field="address"> Address </th>
+                    <th data-field="zip"> Zip Code</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
+            </thead>
+            <tbody>
+                {% for dealership in dealerships %}
+                    <tr key=`dealership-${{dealership.id}}-row`>
+                        <td data-field="id"> {{dealership.id}} </td>
+                        <td data-field="name"> {{dealership.full_name}} </td>
+                        <td data-field="state"> {{dealership.state}} </td>
+                        <td data-field="city"> {{dealership.city}} </td>
+                        <td data-field="address"> {{dealership.address}} </td>
+                        <td data-field="zip"> {{dealership.zip}} </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <script>
+            function filter() {
+                var txtValue, td
+                var selected = document.getElementById("state-select")
+                var filter = selected.value
+                var table = document.getElementById("dealership-table")
+                var tr = table.getElementsByTagName("tr")
+                for (let i=0; i<tr.length; i++) {
+                    td = tr[i].getElementsByTagName("td")[2]
+                   
+                    if(td) {
+                        txtValue = td.textContent || td.innerText
+                        if(txtValue.indexOf(filter) > -1) {
+                            tr[i].style.display = ""
+                        } else {
+                            tr[i].style.display  = "none"
+                        }
+                    }
+                }
+            }
+        </script>
     </body>
 
 </html>

@@ -2,9 +2,10 @@ import requests
 import json
 from .models import CarDealer, CarReview
 from requests.auth import HTTPBasicAuth
+
 from ibm_watson import NaturalLanguageUnderstandingV1
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
-from ibm_watson.natural_language_understanding_v1 import Features, SentimentOptions
+from ibm_watson.natural_language_understanding_v1 import Features, ClassificationsOptions
 
 
 def get_request(url, **kwargs):
@@ -13,12 +14,7 @@ def get_request(url, **kwargs):
     api_key = kwargs.get("apikey")
     try:
         if api_key:
-            params = dict()
-            params["text"] = kwargs["text"]
-            params["version"] = kwargs["version"]
-            params["features"] = kwargs["features"]
-            params["return_analyzed_text"] = kwargs["return_analyzed_text"]
-            response = requests.get(url, params=params, auth=HTTPBasicAuth('apikey', api_key), headers={'Content-Type': 'application/json'})
+            response = requests.post(url, auth={'apikey':api_key}, json={"IAM_API_KEY":"ZWeOsOsnjedSWilr6FnZIXgeq_O_bmBQ4oupwsP4Sjql"}, headers={'Content-Type': 'application/json'})
         else:
             response = requests.get(url, params=kwargs, headers={'Content-Type': 'application/json'})
     except:
@@ -42,13 +38,19 @@ def post_request(url, review, **kwargs):
     status_code = response.status_code
     print("With status {}".format(status_code))
 
-
+def find_element_in_list(element, list_element):
+    try:
+        index_element = list_element.index(element)
+        return index_element
+    except ValueError:
+        return None
 def get_dealers_from_cf(url, **kwargs):#, id="", state="", **kwargs):
     results = []
+    states = []
     test_id = kwargs.get("id")
     test_state = kwargs.get("state")
     if(test_id != None):
-        json_result = get_request(url, id=test_id)
+        json_result = get_request(url, id = test_id)
     elif (test_state != None):
         json_result = get_request(url, state=test_state)
     else:
@@ -75,15 +77,19 @@ def get_dealers_from_cf(url, **kwargs):#, id="", state="", **kwargs):
                 short_name=dealer_doc["short_name"],
                 full_name=dealer_doc["full_name"]
             )
+            test = find_element_in_list(dealer_doc["state"], states)
+            if(test == None):
+                states.append(dealer_doc["state"])
             results.append(dealer_obj)
         print(counter)
-    return results
+        states.sort()
+    return [results, states]
 
 def get_dealer_reviews_from_cf(url, dealer_id):
     results = []
-    json_result = get_request(url, dealership=dealer_id)
+    json_result = get_request(url, dealershipID=str(dealer_id))
     if json_result:
-        reviews = json_result["rows"]
+        reviews = json_result["docs"]
         for review in reviews: 
             review_obj = CarReview(
                 id=review["id"],
@@ -97,21 +103,19 @@ def get_dealer_reviews_from_cf(url, dealer_id):
                 car_year=review["car_year"],
                 sentiment = "neutral"
             )
-            #review_obj.sentiment = analyze_review_sentiments(review_obj.review)
+            review_obj.sentiment = analyze_review_sentiments(review_obj.review)
             results.append(review_obj)
     return results
 
 
 
 def analyze_review_sentiments(dealer_review):
-# - Call get_request() with specified arguments
-# - Get the returned sentiment label such as Positive or Negative
-    apikey = "ZWeOsOsnjedSWilr6FnZIXgeq_O_bmBQ4oupwsP4Sjql"
-    url = "https://api.eu-de.natural-language-understanding.watson.cloud.ibm.com"
+    apikey = "qXhcylrnsRepZcSwClUN4ttwXfOZSGCKwrCdT4rG-7tt"
+    url = "https://api.eu-de.natural-language-understanding.watson.cloud.ibm.com/instances/be48975c-a6be-4e7c-8c69-59f9813123ca"
     
     authenticator = IAMAuthenticator(apikey)
     natural_language_understanding = NaturalLanguageUnderstandingV1(
-        version='2022-04-07',
+        version='2022-08-10',
         authenticator=authenticator
     )
 
@@ -119,13 +123,10 @@ def analyze_review_sentiments(dealer_review):
 
     response = natural_language_understanding.analyze(
         text=dealer_review,
-        language='en',
-        features=Features(sentiment=SentimentOptions(targets=[dealer_review]))
-    ).get_result()
-
-    print(json.dumps(response, indent=2))
-    
-    return response["sentiment"]["document"]["label"]
+        features=Features(classifications=ClassificationsOptions(model="2303094c-0943-4974-9052-cd79b8c6bb6d")),
+    )
+    #print(response.result["classifications"][0]["class_name"])
+    return response.result["classifications"][0]["class_name"]
 
 
 
