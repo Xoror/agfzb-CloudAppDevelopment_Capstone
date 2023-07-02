@@ -62,7 +62,7 @@ def get_dealers_from_cf(url, **kwargs):#, id="", state="", **kwargs):
         for dealer in dealers:
             counter +=1
             if(test_id != None or test_state != None):
-                dealer_doc = dealer
+                dealer_doc = dealer["doc"]
             else:
                 dealer_doc = dealer["doc"]
             dealer_obj = CarDealer(
